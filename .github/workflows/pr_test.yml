@@ -10,11 +10,19 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '👋 Thanks for reporting!'
-            })
+            const runId = context.runId;
+            const repo = context.repo;
+            const stepUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}/jobs/`;
+            const commentBody = `
+              ### Workflow Step Link
+              You can view the details of the specific step in the workflow run [here](${stepUrl}).
+            `;
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: commentBody
+            });
+
 
       - run: echo ${{ toJSON(github) }}
