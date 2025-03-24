@@ -12,7 +12,7 @@ jobs:
           script: |
             const runId = context.runId;
             const repo = context.repo;
-            const stepUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}/jobs/`;
+            const stepUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
             const commentBody = `
               ### Workflow Step Link
               You can view the details of the specific step in the workflow run [here](${stepUrl}).
@@ -25,4 +25,4 @@ jobs:
             });
 
 
-      - run: echo ${{ github }}
+      - run: echo "${{ toJSON(github) }}"
