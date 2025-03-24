@@ -12,17 +12,40 @@ jobs:
           script: |
             const runId = context.runId;
             const repo = context.repo;
-            const stepUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+            const stepUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}/`;
             const commentBody = `
               ### Workflow Step Link
               You can view the details of the specific step in the workflow run [here](${stepUrl}).
             `;
-            await github.rest.issues.createComment({
+  
+            // Fetch existing comments on the PR
+            const { data: comments } = await github.rest.issues.listComments({
               owner: repo.owner,
               repo: repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: commentBody
             });
-
+  
+            // Check if a comment already exists with a specific identifier
+            const existingComment = comments.find(comment =>
+              comment.body.includes("### Workflow Step Link")
+            );
+  
+            if (existingComment) {
+              // Update the existing comment
+              await github.rest.issues.updateComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: existingComment.id,
+                body: commentBody,
+              });
+            } else {
+              // Create a new comment
+              await github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: commentBody,
+              });
+            }
 
       - run: echo "${{ toJSON(github) }}"
