@@ -1,0 +1,71 @@
+name: Add PR comment with step link
+description: Add PR comment with step link
+inputs:
+  github_token:
+    description: "GitHub token"
+    required: true
+  unit_test_outcome:
+    description: "Unit test outcome"
+    required: true
+  build_outcome:
+    description: "Build outcome"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Add PR comment with step link
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github_token }}
+        script: |
+          const runId = context.runId;
+          const repo = context.repo;
+          const stepUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}/jobs/`;
+
+          let commentBody = "### Workflow Test Results\n";
+
+          // Unit Test Results
+          if (inputs.unit_test_outcome === 'success') {
+            commentBody += "- ✅ Unit tests passed successfully.\n";
+          } else {
+            commentBody += "- ❌ Unit tests failed. Please check the logs for details.\n";
+          }
+
+          // Build Results
+          if (inputs.build_outcome === 'success') {
+            commentBody += "- ✅ Build passed successfully.\n";
+          } else {
+            commentBody += "- ❌ Build failed. Please check the logs for details.\n";
+          }
+
+          commentBody += `\nYou can view the details of the specific step in the workflow run [here](${stepUrl}).`;
+
+          // Fetch existing comments on the PR
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: repo.owner,
+            repo: repo.repo,
+            issue_number: context.payload.pull_request.number,
+          });
+
+          // Check if a comment already exists with a specific identifier
+          const existingComment = comments.find(comment =>
+            comment.body.includes("### Workflow Test Results")
+          );
+
+          if (existingComment) {
+            // Update the existing comment
+            await github.rest.issues.updateComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              comment_id: existingComment.id,
+              body: commentBody,
+            });
+          } else {
+            // Create a new comment
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: commentBody,
+            });
