@@ -8,8 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Add PR comment
-        if: ${{ !cancelled() }}
-        uses: ./.github/actions/add_pr
+        uses: ./.github/add_pr
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           unit_test_outcome: success
