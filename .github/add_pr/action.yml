@@ -69,3 +69,4 @@ runs:
               issue_number: context.payload.pull_request.number,
               body: commentBody,
             });
+          }
