@@ -25,4 +25,4 @@ jobs:
             });
 
 
-      - run: echo ${{ toJSON(github) }}
+      - run: echo ${{ github }}
