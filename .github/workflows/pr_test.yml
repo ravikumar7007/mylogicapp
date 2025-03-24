@@ -1,0 +1,6 @@
+on: pull_request
+jobs:
+  context:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ toJSON(github) }}
