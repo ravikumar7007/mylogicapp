@@ -1,0 +1,13 @@
+name: Test cicd
+on:
+  workflow_dispatch: 
+  push:
+    branches: 
+      - main
+
+jobs:
+  test:
+    name: Test job
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ toJson(github) }}"
